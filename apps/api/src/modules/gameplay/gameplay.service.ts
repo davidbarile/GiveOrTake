@@ -104,7 +104,8 @@ export class GameplayService {
     });
 
     const targets = this.selectTargets(allStates, playerId, playersPerAction);
-    if (targets.length === 0) {
+    const isSoloQuickstart = pod.creatorId === null && pod.name === 'Quickstart Classic';
+    if (targets.length === 0 && !isSoloQuickstart) {
       throw new BadRequestException('No eligible players left to target');
     }
 

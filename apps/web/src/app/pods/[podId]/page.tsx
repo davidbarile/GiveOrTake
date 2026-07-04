@@ -196,7 +196,8 @@ export default function PodPage({ params }: { params: Promise<{ podId: string }>
   const eligibleTargetCount = player?.id
     ? livingPlayers.filter((entry) => entry.player.id !== player.id).length
     : Math.max(0, livingPlayers.length - 1);
-  const noEligibleTargets = eligibleTargetCount === 0;
+  const isSoloQuickstart = pod?.name === 'Quickstart Classic' && pod.currentPlayerCount <= 1;
+  const noEligibleTargets = eligibleTargetCount === 0 && !isSoloQuickstart;
   const actionDisabledReason = !actionsEnabled
     ? pod?.status === 'FILLING'
       ? 'Waiting for pod to fill'

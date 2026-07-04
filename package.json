@@ -1,0 +1,25 @@
+{
+  "name": "give-or-take-pods",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.13",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter=web --filter=api dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "smoke:api": "bash scripts/smoke-api.sh",
+    "recover:local": "bash scripts/recover-local.sh"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@prisma/client": "5.22.0",
+    "@rollup/rollup-darwin-x64": "4.62.2",
+    "prisma": "5.22.0"
+  }
+}

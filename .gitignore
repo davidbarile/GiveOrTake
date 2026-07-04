@@ -1,0 +1,13 @@
+node_modules
+.next
+.next-dev
+.next-build
+dist
+build
+.env
+.env.local
+*.local
+.logs/
+prisma/dev.db
+prisma/migrations/*/migration_lock.toml
+.DS_Store

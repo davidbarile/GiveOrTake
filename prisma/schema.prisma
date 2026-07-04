@@ -1,0 +1,279 @@
+// This is the Prisma schema for Give or Take Pods MVP
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum PodTemplateType {
+  CLASSIC
+  POWER
+  KARMA
+  HYBRID
+  CUSTOM
+}
+
+enum KarmaMode {
+  NONE
+  GIVE_ONLY
+  TAKE_ONLY
+  DUAL
+}
+
+enum PowerPackage {
+  NONE
+  SOCIAL_ONLY
+  TACTICAL_LIGHT
+  FULL_TACTICAL
+}
+
+enum PodVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum PodStatus {
+  FILLING
+  COUNTDOWN
+  ACTIVE
+  COMPLETED
+}
+
+enum PodMembershipStatus {
+  JOINED
+  ACTIVE
+  ELIMINATED
+  COMPLETED
+  LEFT_QUEUE
+}
+
+enum ActionType {
+  GIVE
+  TAKE
+  PURCHASE
+  BROADCAST
+  SYSTEM
+}
+
+enum FeedMessageType {
+  SYSTEM
+  ACTION
+  ELIMINATION
+  BROADCAST
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+/// A player — may be a guest or a claimed account
+model Player {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  email        String?   @unique
+  passwordHash String?
+  isGuest      Boolean   @default(true)
+  claimedAt    DateTime?
+  locale       String    @default("en")
+
+  /// How many pods this player may own simultaneously (default 1)
+  ownedPodSlots       Int @default(1)
+  extraSlotsPurchased Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions     DeviceSession[]
+  createdPods  Pod[]           @relation("CreatedPods")
+  memberships  PodMembership[]
+  playerStates PodPlayerState[]
+  actionEvents ActionEvent[]
+  ledgerRows   GemLedger[]
+  feedMessages FeedMessage[]
+  notifications PodNotification[]
+  analyticsEvents AnalyticsEvent[]
+}
+
+/// Session token for a device / browser tab — supports guest re-entry
+model DeviceSession {
+  id                 String   @id @default(cuid())
+  playerId           String
+  sessionTokenHash   String   @unique
+  deviceFingerprint  String?
+  lastSeenAt         DateTime @default(now())
+  expiresAt          DateTime
+  createdAt          DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+/// A game pod — public or private, with template-driven rules
+model Pod {
+  id           String          @id @default(cuid())
+  name         String
+  creatorId    String?         // null for system-managed pods
+  templateType PodTemplateType
+  karmaMode    KarmaMode       @default(NONE)
+  powerPackage PowerPackage    @default(NONE)
+  visibility   PodVisibility   @default(PUBLIC)
+  inviteCode   String?         @unique
+
+  sizeLimit             Int
+  currentPlayerCount    Int       @default(0)
+  status                PodStatus @default(FILLING)
+  startingGems          Int       @default(100)
+  actionCooldownSeconds Int       @default(60)
+
+  countdownStartedAt DateTime?
+  startedAt          DateTime?
+  endedAt            DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator     Player?          @relation("CreatedPods", fields: [creatorId], references: [id], onDelete: SetNull)
+  memberships PodMembership[]
+  playerStates PodPlayerState[]
+  actionEvents ActionEvent[]
+  ledgerRows   GemLedger[]
+  feedMessages FeedMessage[]
+  notifications PodNotification[]
+  analyticsEvents AnalyticsEvent[]
+  snapshots    PodAnalyticsSnapshot[]
+}
+
+/// Tracks which players have joined / are in which pods
+model PodMembership {
+  id               String              @id @default(cuid())
+  podId            String
+  playerId         String
+  membershipStatus PodMembershipStatus @default(JOINED)
+  joinedAt         DateTime            @default(now())
+  leftAt           DateTime?
+
+  pod    Pod    @relation(fields: [podId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([podId, playerId])
+}
+
+/// Per-pod per-player game state
+model PodPlayerState {
+  id      String @id @default(cuid())
+  podId   String
+  playerId String
+
+  currentGems    Int     @default(100)
+  totalGiveCount Int     @default(0)
+  totalTakeCount Int     @default(0)
+  giveKarmaScore Decimal @default(0) @db.Decimal(10, 4)
+  takeKarmaScore Decimal @default(0) @db.Decimal(10, 4)
+
+  nextActionAt   DateTime?
+  activeEffects  Json?
+  eliminatedAt   DateTime?
+
+  pod    Pod    @relation(fields: [podId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([podId, playerId])
+}
+
+/// Idempotent record of every player-initiated action
+model ActionEvent {
+  id         String     @id @default(cuid())
+  podId      String
+  playerId   String
+  requestId  String     // client-generated uuid for idempotency
+  actionType ActionType
+  payload    Json
+  createdAt  DateTime   @default(now())
+
+  pod    Pod    @relation(fields: [podId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([podId, requestId])
+}
+
+/// Append-only gem ledger — every balance change
+model GemLedger {
+  id                  BigInt   @id @default(autoincrement())
+  podId               String
+  playerId            String
+  sourceEventId       String
+  delta               Int
+  balanceAfter        Int
+  reason              String
+  counterpartyPlayerId String?
+  createdAt           DateTime @default(now())
+
+  pod    Pod    @relation(fields: [podId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+/// Pod chat / event feed messages
+model FeedMessage {
+  id               String          @id @default(cuid())
+  podId            String
+  playerId         String?
+  messageType      FeedMessageType
+  body             String
+  isRejected       Boolean         @default(false)
+  moderationReason String?
+  createdAt        DateTime        @default(now())
+
+  pod    Pod     @relation(fields: [podId], references: [id], onDelete: Cascade)
+  player Player? @relation(fields: [playerId], references: [id], onDelete: SetNull)
+}
+
+/// Push notifications per player per pod
+model PodNotification {
+  id               String   @id @default(cuid())
+  playerId         String
+  podId            String
+  notificationType String   // pod_full | countdown | started | eliminated | completed
+  payloadJson      Json?
+  readAt           DateTime?
+  createdAt        DateTime @default(now())
+
+  pod    Pod    @relation(fields: [podId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+/// Raw analytics event stream
+model AnalyticsEvent {
+  id        BigInt   @id @default(autoincrement())
+  podId     String?
+  playerId  String?
+  eventType String
+  payload   Json
+  eventTime DateTime @default(now())
+
+  pod    Pod?    @relation(fields: [podId], references: [id], onDelete: SetNull)
+  player Player? @relation(fields: [playerId], references: [id], onDelete: SetNull)
+}
+
+/// Periodic economy snapshots for social-experiment analysis
+model PodAnalyticsSnapshot {
+  id               BigInt   @id @default(autoincrement())
+  podId            String
+  snapshotTime     DateTime @default(now())
+  livingPlayers    Int
+  totalGems        Int
+  giveRate         Decimal  @db.Decimal(6, 4)
+  takeRate         Decimal  @db.Decimal(6, 4)
+  giniCoefficient  Decimal  @db.Decimal(6, 4)
+  top10Share       Decimal  @db.Decimal(6, 4)
+  eliminationCount Int
+  payload          Json?
+
+  pod Pod @relation(fields: [podId], references: [id], onDelete: Cascade)
+}

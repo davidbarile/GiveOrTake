@@ -100,8 +100,8 @@ export default function LandingPage() {
           <h1 className="got-hero-title">Ready to play?</h1>
           <p className="got-hero-copy">Jump into a Classic Pod instantly — no account required.</p>
           {player && <p className="got-muted" style={{ marginTop: 16 }}>Playing as {player.username ?? 'guest'}</p>}
-          <div className="got-button-stack">
-            <button onClick={startGuest} disabled={loading} className="got-button got-button-gold got-button-span">
+          <div className="got-button-stack got-splash-buttons">
+            <button onClick={startGuest} disabled={loading} className="got-button got-button-gold">
               {loading ? 'Starting...' : 'Start now'}
             </button>
             <div className="got-button-row">

@@ -254,7 +254,6 @@ export default function PodPage({ params }: { params: Promise<{ podId: string }>
             </Link>
             <div className="got-brand-copy">
               <p className="got-brand-title got-brand-title-small">{pod?.name ?? 'Loading pod'}</p>
-              <p className="got-brand-subtitle">Live pod arena</p>
             </div>
           </div>
           <div className="got-topbar-actions">

@@ -15,6 +15,7 @@ export default function ClaimPage() {
   const [returnTo, setReturnTo] = useState('/app');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
@@ -27,6 +28,7 @@ export default function ClaimPage() {
     fetch(`${API}/session/me`, { credentials: 'include' })
       .then((res) => (res.ok ? res.json() : null))
       .then((player) => {
+        if (player?.username) setUsername(player.username);
         if (player && !player.isGuest) {
           setDone(true);
           setTimeout(() => router.replace(nextReturnTo), 700);
@@ -42,7 +44,7 @@ export default function ClaimPage() {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, username }),
     });
     if (!res.ok) {
       const data = await res.json();
@@ -89,6 +91,18 @@ export default function ClaimPage() {
             <p className="got-success got-claim-message">Progress already saved. Returning...</p>
           ) : (
             <form onSubmit={handleClaim} className="got-claim-form" autoComplete="off">
+              <label className="got-form-field">
+                <span className="got-form-label">Username</span>
+                <input
+                  type="text"
+                  required
+                  maxLength={20}
+                  autoComplete="off"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Your display name"
+                />
+              </label>
               <label className="got-form-field">
                 <span className="got-form-label">Email</span>
                 <input

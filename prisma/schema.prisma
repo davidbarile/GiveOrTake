@@ -139,7 +139,9 @@ model Pod {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  creator     Player?          @relation("CreatedPods", fields: [creatorId], references: [id], onDelete: SetNull)
+  // Cascade (not SetNull): a pod whose creator is deleted must not become an ownerless
+  // "anonymous" pod (creatorId null is reserved for system-managed pods) — delete it instead.
+  creator     Player?          @relation("CreatedPods", fields: [creatorId], references: [id], onDelete: Cascade)
   memberships PodMembership[]
   playerStates PodPlayerState[]
   actionEvents ActionEvent[]

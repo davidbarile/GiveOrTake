@@ -106,19 +106,31 @@ export class IdentityService {
     return null;
   }
 
-  /** Claim an account: attach email + password to a guest player */
+  /** Claim an account: attach email + password to a guest player, optionally renaming them */
   async claimAccount(
     playerId: string,
     email: string,
     password: string,
+    username?: string,
   ): Promise<{ id: string; username: string; email: string; isGuest: boolean }> {
     const existing = await this.prisma.player.findUnique({ where: { email } });
     if (existing) throw new Error('EMAIL_TAKEN');
 
+    if (username !== undefined) {
+      if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) throw new Error('INVALID_USERNAME');
+      const usernameTaken = await this.prisma.player.findFirst({
+        where: { username, NOT: { id: playerId } },
+      });
+      if (usernameTaken) throw new Error('USERNAME_TAKEN');
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
     const player = await this.prisma.player.update({
       where: { id: playerId },
-      data: { email, passwordHash, isGuest: false, claimedAt: new Date() },
+      data: {
+        email, passwordHash, isGuest: false, claimedAt: new Date(),
+        ...(username !== undefined ? { username } : {}),
+      },
       select: { id: true, username: true, email: true, isGuest: true },
     });
     return player as any;
@@ -150,7 +162,9 @@ export class IdentityService {
   /** Change username (anyone can call this once per session) */
   async changeUsername(playerId: string, newUsername: string): Promise<string> {
     if (!/^[A-Za-z0-9_]{3,24}$/.test(newUsername)) throw new Error('INVALID_USERNAME');
-    const existing = await this.prisma.player.findUnique({ where: { username: newUsername } });
+    const existing = await this.prisma.player.findFirst({
+      where: { username: newUsername, NOT: { id: playerId } },
+    });
     if (existing) throw new Error('USERNAME_TAKEN');
     await this.prisma.player.update({ where: { id: playerId }, data: { username: newUsername } });
     return newUsername;

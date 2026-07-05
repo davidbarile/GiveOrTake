@@ -368,6 +368,24 @@ textarea:focus {
   margin: 28px auto 0;
 }
 
+.got-splash-buttons {
+  justify-items: center;
+}
+
+.got-splash-buttons .got-button {
+  width: auto;
+  min-height: 78px;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+.got-splash-buttons .got-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: auto;
+}
+
 .got-button-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

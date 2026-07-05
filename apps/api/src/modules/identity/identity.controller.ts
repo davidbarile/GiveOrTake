@@ -44,7 +44,7 @@ export class IdentityController {
   @Post('claim')
   @HttpCode(HttpStatus.OK)
   async claim(
-    @Body() body: { email: string; password: string },
+    @Body() body: { email: string; password: string; username?: string },
     @Req() req: Request,
   ) {
     const token = getToken(req);
@@ -53,9 +53,12 @@ export class IdentityController {
     if (!playerId) throw new UnauthorizedException();
 
     try {
-      return await this.identity.claimAccount(playerId, body.email, body.password);
+      return await this.identity.claimAccount(playerId, body.email, body.password, body.username);
     } catch (e: any) {
       if (e.message === 'EMAIL_TAKEN') throw new ConflictException('Email already registered');
+      if (e.message === 'USERNAME_TAKEN') throw new ConflictException('Username already taken');
+      if (e.message === 'INVALID_USERNAME')
+        throw new BadRequestException('Username must be 3–20 chars, letters/numbers/underscores only');
       throw e;
     }
   }

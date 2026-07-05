@@ -74,7 +74,7 @@ export default function LandingPage() {
 
       <div className="got-shell">
         <section className="got-surface got-hero">
-          <div className="got-grid-2 got-hero-feature-grid">
+          <div className="got-hero-feature-grid got-hero-feature-grid-compact">
             <div className="got-action-card got-action-card-compact got-action-give">
               <div className="got-action-content">
                 <div className="got-action-icon"><img src="/skins/Gem_Green.png" alt="Green gem" className="got-gem-image got-action-gem" /></div>
@@ -100,8 +100,8 @@ export default function LandingPage() {
           <h1 className="got-hero-title">Ready to play?</h1>
           <p className="got-hero-copy">Jump into a Classic Pod instantly — no account required.</p>
           {player && <p className="got-muted" style={{ marginTop: 16 }}>Playing as {player.username ?? 'guest'}</p>}
-          <div className="got-button-stack got-splash-buttons">
-            <button onClick={startGuest} disabled={loading} className="got-button got-button-gold">
+          <div className="got-button-stack">
+            <button onClick={startGuest} disabled={loading} className="got-button got-button-gold got-button-span">
               {loading ? 'Starting...' : 'Start now'}
             </button>
             <div className="got-button-row">

@@ -368,24 +368,6 @@ textarea:focus {
   margin: 28px auto 0;
 }
 
-.got-splash-buttons {
-  justify-items: center;
-}
-
-.got-splash-buttons .got-button {
-  width: auto;
-  min-height: 78px;
-  padding-left: 32px;
-  padding-right: 32px;
-}
-
-.got-splash-buttons .got-button-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  width: auto;
-}
-
 .got-button-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -530,33 +512,43 @@ textarea:focus {
   color: rgba(255, 247, 237, 0.92);
 }
 
+.got-hero-feature-grid-compact {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+
 .got-action-card-compact {
-  padding: 10px 14px;
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 340px;
+  padding: 15px 21px;
 }
 
 .got-action-card-compact .got-action-content {
-  gap: 10px;
+  gap: 15px;
 }
 
 .got-action-card-compact .got-action-icon {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  border-radius: 10px;
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
+  border-radius: 12px;
 }
 
 .got-action-card-compact .got-action-gem {
-  width: 26px;
+  width: 39px;
 }
 
 .got-action-card-compact .got-action-label {
-  font-size: 0.95rem;
+  font-size: 1.4rem;
   margin: 0;
 }
 
 .got-action-card-compact .got-action-copy {
-  font-size: 0.78rem;
-  margin: 2px 0 0;
+  font-size: 1.15rem;
+  margin: 4px 0 0;
 }
 
 .got-pod-card-button {

@@ -468,6 +468,10 @@ export class PodsService {
       await this.prisma.podPlayerState.updateMany({
         where: {
           eliminatedAt: null,
+          // Only rescale players who are already mid-cooldown to the new duration — players
+          // who are idle (nextActionAt null, or already elapsed) must not have a cooldown
+          // imposed on them just because an admin edited the default setting.
+          nextActionAt: { gt: now },
           pod: { creatorId: null, status: { not: PodStatus.COMPLETED } },
         },
         data: {

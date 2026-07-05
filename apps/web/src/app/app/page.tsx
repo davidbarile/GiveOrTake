@@ -258,7 +258,7 @@ export default function AppPage() {
   const createPodTitle = !player
     ? 'Loading player'
     : player.isGuest
-      ? 'You must register to create a pod'
+      ? 'Login to enable Creating Pods'
       : hasReachedPodLimit
         ? 'Max pods created'
         : undefined;

@@ -342,7 +342,10 @@ export class PodsService {
         name: 'Quickstart Classic',
         visibility: PodVisibility.PUBLIC,
         templateType: 'CLASSIC' as any,
-        status: PodStatus.FILLING,
+        // Quickstart flips a pod to ACTIVE as soon as the first player joins (see below), so
+        // later joiners must still be able to find it here — restricting to FILLING would make
+        // every subsequent quickstart create its own separate pod instead of joining this one.
+        status: { in: [PodStatus.FILLING, PodStatus.ACTIVE] },
         currentPlayerCount: { lt: 25 },
       },
       orderBy: { createdAt: 'asc' },

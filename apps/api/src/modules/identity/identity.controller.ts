@@ -142,6 +142,17 @@ export class IdentityController {
     res.cookie(COOKIE_NAME, result.sessionToken, COOKIE_OPTS);
     return { player: result.player };
   }
+
+  @Post('debug/delete-anonymous-users')
+  @HttpCode(HttpStatus.OK)
+  async deleteAnonymousUsers(
+    @Body() body: { deviceFingerprint?: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.identity.deleteAnonymousUsersAndBootstrap(body.deviceFingerprint);
+    res.cookie(COOKIE_NAME, result.sessionToken, COOKIE_OPTS);
+    return { player: result.player };
+  }
 }
 
 @Controller('profile')

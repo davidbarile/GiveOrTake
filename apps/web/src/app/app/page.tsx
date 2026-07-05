@@ -162,6 +162,15 @@ async function deleteAllUsers(): Promise<Player> {
   return data.player;
 }
 
+async function deleteAnonymousUsers(): Promise<Player> {
+  const res = await fetch(`${API}/session/debug/delete-anonymous-users`, {
+    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
+  });
+  if (!res.ok) throw new Error((await res.json()).message ?? 'Failed to delete anonymous users');
+  const data = await res.json();
+  return data.player;
+}
+
 function templateTone(templateType: string) {
   if (templateType === 'POWER') return { background: '#e9f4ff', color: '#2367aa' };
   if (templateType === 'KARMA') return { background: '#fff0fd', color: '#9c2aa0' };
@@ -361,6 +370,21 @@ export default function AppPage() {
     }
   }
 
+  async function handleDeleteAnonymousUsers() {
+    if (!window.confirm('Delete anonymous users? This clears every guest account (and any pods they created) but keeps saved accounts, then signs this browser into a fresh guest.')) return;
+    setDebugSaved('Deleting anonymous users...');
+    setError('');
+    try {
+      await deleteAnonymousUsers();
+      await refresh();
+      setDebugSaved('Anonymous users deleted');
+      setTimeout(() => setDebugSaved(''), 1600);
+    } catch (err: any) {
+      setDebugSaved('');
+      setError(err.message);
+    }
+  }
+
   return (
     <div className="got-page">
       <header className="got-topbar">
@@ -452,6 +476,7 @@ export default function AppPage() {
               <button onClick={handleResetPods} className="got-button got-button-outline">Reset All Pods</button>
               <button onClick={handleAddDebugUser} className="got-button got-button-outline" title="Create a fresh guest user and switch this browser to it">Add Debug User</button>
               <button onClick={handleDeleteAllUsers} className="got-button got-button-outline" title="Clear all test accounts and start fresh">Delete All Users</button>
+              <button onClick={handleDeleteAnonymousUsers} className="got-button got-button-outline" title="Clear guest accounts and any pods they created; saved accounts are kept">Delete Anonymous Users</button>
             </div>
             <div className="got-debug-users-section">
               <SectionHeading icon="/skins/Leaderboard_icon.png" title="Test users" copy="Switch the current browser session between fake users for multiplayer testing." />

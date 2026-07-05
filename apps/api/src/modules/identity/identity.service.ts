@@ -203,6 +203,16 @@ export class IdentityService {
     return this.bootstrapGuest(deviceFingerprint);
   }
 
+  /** Delete guest players only (claimed accounts are kept). Any pod an anonymous
+   * player created is cascade-deleted with them (Pod.creator is onDelete: Cascade). */
+  async deleteAnonymousUsersAndBootstrap(deviceFingerprint?: string): Promise<{
+    player: { id: string; username: string; isGuest: boolean };
+    sessionToken: string;
+  }> {
+    await this.prisma.player.deleteMany({ where: { isGuest: true } });
+    return this.bootstrapGuest(deviceFingerprint);
+  }
+
   async listDebugUsers() {
     return this.prisma.player.findMany({
       orderBy: { createdAt: 'desc' },

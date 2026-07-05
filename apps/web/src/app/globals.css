@@ -665,6 +665,15 @@ textarea:focus {
   gap: 12px;
 }
 
+.got-leader-item-self {
+  background: var(--gold-soft);
+  border-color: var(--gold-strong);
+}
+
+.got-leader-item-self .got-leader-name {
+  color: var(--brown);
+}
+
 .got-score-pill {
   min-height: 34px;
   background: #fff3d8;

@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/com
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 const GIVE_COST = 1;       // actor loses 1
 const GIVE_REWARD = 1;     // each target gains 1
@@ -33,6 +34,7 @@ export class GameplayService {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly analytics: AnalyticsService,
+    private readonly realtime: RealtimeGateway,
   ) {}
 
   /** Select up to N random eligible targets (not the actor, not eliminated) */
@@ -216,7 +218,11 @@ export class GameplayService {
     // Check for pod completion (1 player left)
     await this.checkPodCompletion(podId);
 
-    // Emit analytics async  
+    // Tell every connected client in this pod to refetch state — targets' gems/elimination
+    // status just changed and the feed/leaderboard moved, not just the actor's own view.
+    this.realtime.emitToPod(podId, 'pod.sync', { action, playerId });
+
+    // Emit analytics async
     void this.analytics.track(podId, playerId, action === 'GIVE' ? 'action_give' : 'action_take', {
       targets: targets.length,
       actorDelta,

@@ -4,9 +4,10 @@ import { GameplayController } from './gameplay.controller';
 import { PodLifecycleService } from './pod-lifecycle.service';
 import { IdentityModule } from '../identity/identity.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { RealtimeModule } from '../realtime/realtime.module';
 
 @Module({
-  imports: [IdentityModule, AnalyticsModule],
+  imports: [IdentityModule, AnalyticsModule, RealtimeModule],
   providers: [GameplayService, PodLifecycleService],
   controllers: [GameplayController],
   exports: [GameplayService, PodLifecycleService],

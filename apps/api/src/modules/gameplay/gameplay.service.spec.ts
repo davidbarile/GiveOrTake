@@ -30,7 +30,12 @@ describe('GameplayService', () => {
       track: jest.fn(),
     } as any;
 
-    const service = new GameplayService(prisma, redis, analytics);
+    const realtime = {
+      emitToPod: jest.fn(),
+      emitToPlayer: jest.fn(),
+    } as any;
+
+    const service = new GameplayService(prisma, redis, analytics, realtime);
 
     await expect(service.processAction('player-1', 'pod-1', 'GIVE', 'req-1')).rejects.toThrow(
       new BadRequestException('No eligible players left to target'),
@@ -76,7 +81,12 @@ describe('GameplayService', () => {
       track: jest.fn(),
     } as any;
 
-    const service = new GameplayService(prisma, redis, analytics);
+    const realtime = {
+      emitToPod: jest.fn(),
+      emitToPlayer: jest.fn(),
+    } as any;
+
+    const service = new GameplayService(prisma, redis, analytics, realtime);
 
     await expect(service.processAction('player-1', 'pod-1', 'TAKE', 'req-1')).resolves.toMatchObject({
       actorDelta: 1,

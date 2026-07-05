@@ -169,13 +169,6 @@ function templateTone(templateType: string) {
   return { background: '#f2eee8', color: '#6b4b33' };
 }
 
-function actionCopy(action: 'give' | 'take', count: number) {
-  const players = count === 1 ? 'player' : 'players';
-  return action === 'give'
-    ? `Give 1 gem to ${count} random ${players}.`
-    : `Take 1 gem from ${count} random ${players}.`;
-}
-
 function Gem({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
   return <img src={src} alt={alt} className={`got-gem-image ${className}`.trim()} />;
 }
@@ -392,14 +385,6 @@ export default function AppPage() {
 
       <main className="got-shell">
         <section className="got-surface got-hero">
-          <div className="got-grid-2 got-hero-feature-grid">
-            <div className="got-action-card got-action-give">
-              <div className="got-action-content"><div className="got-action-icon"><Gem src="/skins/Gem_Green.png" alt="Green gem" className="got-action-gem" /></div><div><p className="got-action-label">Give</p><p className="got-action-copy">{actionCopy('give', debugSettings.playersPerGiveTakeAction)}</p></div></div>
-            </div>
-            <div className="got-action-card got-action-take">
-              <div className="got-action-content"><div className="got-action-icon"><Gem src="/skins/Gem_Red.png" alt="Red gem" className="got-action-gem" /></div><div><p className="got-action-label">Take</p><p className="got-action-copy">{actionCopy('take', debugSettings.playersPerGiveTakeAction)}</p></div></div>
-            </div>
-          </div>
           <div className="got-divider"><Gem src="/skins/Gem_Small.png" alt="Decorative gem" className="got-divider-gem" /></div>
           <h2 className="got-hero-title">Ready to play?</h2>
           <p className="got-hero-copy">Jump into a Classic Pod instantly — no account required.</p>

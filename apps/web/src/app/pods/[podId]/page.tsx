@@ -177,6 +177,9 @@ export default function PodPage({ params }: { params: Promise<{ podId: string }>
     socket.on('leaderboard.update', (data: LeaderEntry[]) => setLeaderboard(data));
     socket.on('pod.started', () => setPod((p) => (p ? { ...p, status: 'ACTIVE' } : p)));
     socket.on('pod.completed', () => setPod((p) => (p ? { ...p, status: 'COMPLETED' } : p)));
+    // A pod-mate just gave/took — everyone's gems, the feed, and the leaderboard may have
+    // changed, not just the actor's, so pull a fresh snapshot instead of patching one field.
+    socket.on('pod.sync', () => { refreshPodData().catch(console.error); });
 
     return () => {
       socket.disconnect();
@@ -319,9 +322,13 @@ export default function PodPage({ params }: { params: Promise<{ podId: string }>
             <div className="got-leaderboard" style={{ marginTop: 16 }}>
               {leaderboard.length === 0 && <p className="got-muted">Waiting...</p>}
               {leaderboard.slice(0, 15).map((entry, i) => (
-                <div key={entry.player.id} className="got-leader-item" style={entry.eliminatedAt ? { opacity: 0.5 } : undefined}>
+                <div
+                  key={entry.player.id}
+                  className={`got-leader-item${entry.player.id === player?.id ? ' got-leader-item-self' : ''}`}
+                  style={entry.eliminatedAt ? { opacity: 0.5 } : undefined}
+                >
                   <span className="got-rank">{i + 1}</span>
-                  <span style={{ fontWeight: 700 }}>{entry.player.username}</span>
+                  <span className="got-leader-name" style={{ fontWeight: 700 }}>{entry.player.username}</span>
                   <span className="got-pill got-score-pill"><Gem src="/skins/Gem_Brown.png" alt="" className="got-score-gem" />{entry.currentGems}</span>
                 </div>
               ))}

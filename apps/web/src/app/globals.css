@@ -691,6 +691,8 @@ textarea:focus {
 
 .got-modal {
   width: min(640px, 100%);
+  max-height: min(90vh, 860px);
+  overflow-y: auto;
 }
 
 .got-modal-wide {
@@ -699,6 +701,7 @@ textarea:focus {
 
 .got-modal-header {
   display: flex;
+  flex-direction: row;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
@@ -895,7 +898,6 @@ textarea:focus {
 
   .got-pod-card,
   .got-topbar-inner,
-  .got-modal-header,
   .got-debug-user-row {
     flex-direction: column;
     align-items: flex-start;
@@ -903,7 +905,7 @@ textarea:focus {
 
   .got-topbar-actions {
     width: 100%;
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 }
 
@@ -937,6 +939,10 @@ textarea:focus {
   .got-button,
   .got-password-toggle {
     width: 100%;
+  }
+
+  .got-topbar-actions .got-button {
+    width: auto;
   }
 
   .got-hero-actions,

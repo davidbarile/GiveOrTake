@@ -60,6 +60,21 @@ async function getSession(): Promise<Player | null> {
   return res.json();
 }
 
+async function bootstrapGuest(): Promise<Player> {
+  const res = await fetch(`${API}/session/bootstrap`, {
+    method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
+  });
+  if (!res.ok) throw new Error('Bootstrap failed');
+  const data = await res.json();
+  return data.player;
+}
+
+async function ensureSession(): Promise<Player> {
+  const existing = await getSession();
+  if (existing) return existing;
+  return bootstrapGuest();
+}
+
 async function listPods(): Promise<Pod[]> {
   const res = await fetch(`${API}/pods`, { credentials: 'include' });
   if (!res.ok) return [];
@@ -251,8 +266,9 @@ export default function AppPage() {
   }, [debugUsers, player]);
 
   const refresh = async () => {
-    const [currentPlayer, publicList, memberships, settings, users] = await Promise.all([
-      getSession(), listPods(), listMyPods(), getDebugSettings().catch(() => ({ ...debugSettings })), listDebugUsers().catch(() => []),
+    const currentPlayer = await ensureSession();
+    const [publicList, memberships, settings, users] = await Promise.all([
+      listPods(), listMyPods(), getDebugSettings().catch(() => ({ ...debugSettings })), listDebugUsers().catch(() => []),
     ]);
     setPlayer(currentPlayer);
     setPods(publicList);

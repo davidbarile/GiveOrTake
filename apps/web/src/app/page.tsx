@@ -22,37 +22,33 @@ async function getSession() {
   return res.json();
 }
 
-async function getDebugSettings() {
-  const res = await fetch(`${API}/pods/debug/settings`, { credentials: 'include' });
-  if (!res.ok) return { playersPerGiveTakeAction: 5 };
+async function quickstart() {
+  const res = await fetch(`${API}/pods/quickstart`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error('Quickstart failed');
   const data = await res.json();
-  return { playersPerGiveTakeAction: Number(data.playersPerGiveTakeAction) || 5 };
-}
-
-function actionCopy(action: 'give' | 'take', count: number) {
-  const players = count === 1 ? 'player' : 'players';
-  return action === 'give'
-    ? `Give 1 gem to ${count} random ${players}.`
-    : `Take 1 gem from ${count} random ${players}.`;
+  return data.pod.id as string;
 }
 
 export default function LandingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [player, setPlayer] = useState<{ isGuest: boolean; username?: string } | null>(null);
-  const [playersPerGiveTakeAction, setPlayersPerGiveTakeAction] = useState(5);
   const [error, setError] = useState('');
 
   useEffect(() => {
     getSession().then(setPlayer).catch(() => undefined);
-    getDebugSettings().then((settings) => setPlayersPerGiveTakeAction(settings.playersPerGiveTakeAction)).catch(() => undefined);
   }, []);
 
   async function startGuest() {
     try {
       setLoading(true);
       await bootstrapGuest();
-      router.push('/app');
+      const podId = await quickstart();
+      router.push(`/pods/${podId}`);
     } catch {
       setError('Could not start a guest session.');
     } finally {
@@ -73,32 +69,27 @@ export default function LandingPage() {
               <p className="got-brand-subtitle">Social experiment game</p>
             </div>
           </div>
-          <div className="got-topbar-actions">
-            <button className="got-button got-button-light" onClick={() => router.push('/app')}>
-              Enter lobby
-            </button>
-          </div>
         </div>
       </section>
 
       <div className="got-shell">
         <section className="got-surface got-hero">
           <div className="got-grid-2 got-hero-feature-grid">
-            <div className="got-action-card got-action-give">
+            <div className="got-action-card got-action-card-compact got-action-give">
               <div className="got-action-content">
                 <div className="got-action-icon"><img src="/skins/Gem_Green.png" alt="Green gem" className="got-gem-image got-action-gem" /></div>
                 <div>
                   <p className="got-action-label">Give</p>
-                  <p className="got-action-copy">{actionCopy('give', playersPerGiveTakeAction)}</p>
+                  <p className="got-action-copy">Gives a gem to random players.</p>
                 </div>
               </div>
             </div>
-            <div className="got-action-card got-action-take">
+            <div className="got-action-card got-action-card-compact got-action-take">
               <div className="got-action-content">
                 <div className="got-action-icon"><img src="/skins/Gem_Red.png" alt="Red gem" className="got-gem-image got-action-gem" /></div>
                 <div>
                   <p className="got-action-label">Take</p>
-                  <p className="got-action-copy">{actionCopy('take', playersPerGiveTakeAction)}</p>
+                  <p className="got-action-copy">Takes a gem from random players.</p>
                 </div>
               </div>
             </div>

@@ -102,6 +102,16 @@ function formatCooldown(nextActionAt: string | null): string {
   return remaining > 0 ? `${remaining}s` : '';
 }
 
+function renderFeedBody(body: string) {
+  if (body.startsWith('GAVE ')) {
+    return <><span className="got-feed-action-give">GAVE</span>{body.slice(4)}</>;
+  }
+  if (body.startsWith('TOOK ')) {
+    return <><span className="got-feed-action-take">TOOK</span>{body.slice(4)}</>;
+  }
+  return body;
+}
+
 function statusTone(status?: string) {
   if (status === 'ACTIVE') return { background: '#e8f7eb', color: '#1f7b3a' };
   if (status === 'FILLING') return { background: '#fff3d8', color: '#9b6715' };
@@ -308,9 +318,12 @@ export default function PodPage({ params }: { params: Promise<{ podId: string }>
               <div className="got-scroll got-feed-list" style={{ marginTop: 16 }}>
                 {feed.length === 0 && <p className="got-muted">No activity yet.</p>}
                 {[...feed].reverse().map((item) => (
-                  <div key={item.id} className="got-feed-item">
+                  <div
+                    key={item.id}
+                    className={`got-feed-item${item.player?.id === player?.id ? ' got-feed-item-self' : ''}`}
+                  >
                     {item.player && <strong>{item.player.username}: </strong>}
-                    {item.body}
+                    {renderFeedBody(item.body)}
                   </div>
                 ))}
               </div>

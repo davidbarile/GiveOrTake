@@ -512,6 +512,35 @@ textarea:focus {
   color: rgba(255, 247, 237, 0.92);
 }
 
+.got-action-card-compact {
+  padding: 10px 14px;
+}
+
+.got-action-card-compact .got-action-content {
+  gap: 10px;
+}
+
+.got-action-card-compact .got-action-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 10px;
+}
+
+.got-action-card-compact .got-action-gem {
+  width: 26px;
+}
+
+.got-action-card-compact .got-action-label {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.got-action-card-compact .got-action-copy {
+  font-size: 0.78rem;
+  margin: 2px 0 0;
+}
+
 .got-pod-card-button {
   width: 100%;
   text-align: left;
@@ -672,6 +701,21 @@ textarea:focus {
 
 .got-leader-item-self .got-leader-name {
   color: var(--brown);
+}
+
+.got-feed-item-self {
+  background: rgba(244, 209, 138, 0.35);
+  border-color: var(--gold);
+}
+
+.got-feed-action-give {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.got-feed-action-take {
+  color: var(--red);
+  font-weight: 800;
 }
 
 .got-score-pill {
